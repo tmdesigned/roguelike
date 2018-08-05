@@ -9,6 +9,8 @@ export default {
   name: 'Cell',
   props: {
     cellType: String,
+    x : Number,
+    y : Number
   },
   data: function(){
     return {
@@ -27,6 +29,7 @@ export default {
 
 .cell .cell-contents{
   padding:1px;
+  background-color: #444;
   
 }
 .cell-contents:before{
@@ -34,22 +37,5 @@ export default {
   display: block;
   padding-top: 100%;
 }
-.cell:nth-child(even) .cell-contents{
-   background-color:#ccc;
-}
-.cell .cell-contents[data-occupied="room"]{
-   background-color:blue !important;
-}
 
-.cell .cell-contents[data-occupied="hero"]{
-   background-color:green !important;
-}
-
-.cell .cell-contents[data-occupied="monster"]{
-   background-color:red !important;
-}
-
-.cell .cell-contents[data-occupied="treasure"]{
-   background-color:yellow !important;
-}
 </style>

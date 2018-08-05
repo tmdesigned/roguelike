@@ -18,6 +18,13 @@
 
 <script>
 import Dungeon from './components/Dungeon.vue'
+
+// const store = new Vuex.Store({
+//   state: {
+//   }
+// });
+
+
 export default {
   name: 'app',
   data: function(){
@@ -31,11 +38,56 @@ export default {
   },
   components: {
     Dungeon
+  },
+  mounted : function(){
+    window.addEventListener('keydown', (e) => {
+      console.log('h');
+      this.handleKey(e);
+    });
+  },
+  methods: {
+    handleKey : function( e ){
+
+      switch( e.keyCode ){
+        case 38 :
+          this.$eventHub.$emit('move', 'up' );
+          break;
+        case 40 :
+          this.$eventHub.$emit('move', 'down' );
+          break;
+        case 37 :
+          this.$eventHub.$emit('move', 'left' );
+          break;
+        case 39 :
+          this.$eventHub.$emit('move', 'right' );
+          break;
+        default:
+          break;
+        
+      }
+    }
   }
 }
+
+
+
 </script>
 
+
+
 <style>
+
+body{
+  margin: 0;
+  padding: 0;
+  background-color: #222;
+}
+
+.canvas {
+    padding: 5px;
+    background-color: #333;
+}
+
 .container{
    margin:1em auto;
    max-width:900px;

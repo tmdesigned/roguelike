@@ -1,8 +1,11 @@
 <template>
     <div class="canvas">
-      <div class="row" v-for="row in rows">
-        <div class="cell" v-for="cell in row">
-            <Cell v-bind:cellType="cell.occupied"></Cell>
+      <div class="row" v-for="(row,x) in rows">
+        <div class="cell" v-for="(cell,y) in row">
+            <Hero v-bind:x="x" v-bind:y="y" v-if="cell.occupied == 'hero'" v-on:move-hero="moveHero"></Hero>
+            <Room v-else-if="cell.occupied == 'room'"></Room>
+            <Cell v-else></Cell>
+
         </div>
       </div>
     </div>
@@ -11,11 +14,15 @@
 <script>
 import {MapNode} from '../MapNode.class.js'
 import Cell from './Cell.vue'
+import Hero from './Hero.vue'
+import Room from './Room.vue'
 
 export default {
   name: 'Dungeon',
   components: {
-    Cell
+    Cell,
+    Room,
+    Hero
   },
   props:{
     widthOfGrid : Number,
@@ -55,6 +62,16 @@ export default {
        this.master.split( true, this.minRoomDimension, this.currentRooms, this.maxRooms );
        this.markRooms( this.master );
        this.markConnections( this.master ); 
+       this.addHero();
+     },
+     moveHero : function( moveData ){
+       var requestedX = moveData.dir == 'up' ? moveData.x - 1 : moveData.dir == 'down' ? moveData.x + 1 : moveData.x;
+       var requestedY = moveData.dir == 'left' ? moveData.y - 1 : moveData.dir == 'right' ? moveData.y + 1 : moveData.y;
+       if ( this.rows[ requestedX ][ requestedY ].occupied == 'room' ){
+         let hero = this.rows[ moveData.x ].splice( moveData.y, 1, { "occupied" : "room" } );
+         console.log( hero, "moving to:", requestedX, requestedY );
+         this.rows[ requestedX ].splice( requestedY, 1, { "occupied" : "hero" } );
+       }
      },
      markConnections : function( node ){
         for ( let child of node.children ){
@@ -71,10 +88,10 @@ export default {
            this.markRooms( child );
         }
      },
-     addMonster : function(){
+     addHero : function(){
         var options = this.findAllByType( "room" );
         var choice = options[ randInt( 0, options.length - 1 ) ];
-        this.rows[ choice.x].splice( choice.y, 1, { "occupied" : "monster" });
+        this.rows[ choice.x].splice( choice.y, 1, { "occupied" : "hero" });
        // this.rows[ choice.x ][ choice.y ] = { "occupied" : "monster" }
      },
      markRoom : function( x1, y1, x2, y2 ){
