@@ -3,6 +3,7 @@
       <div class="row" v-for="(row,x) in rows">
         <div class="cell" v-for="(cell,y) in row">
             <Hero v-bind:x="x" v-bind:y="y" v-if="cell.occupied == 'hero'" v-on:move-hero="moveHero"></Hero>
+            <Rock v-bind:x="x" v-bind:y="y" v-else-if="cell.occupied == 'rock'"></Rock>
             <Room v-else-if="cell.occupied == 'room'"></Room>
             <Cell v-else></Cell>
 
@@ -14,14 +15,18 @@
 <script>
 import {MapNode} from '../MapNode.class.js'
 import Cell from './Cell.vue'
+import Rock from './Rock.vue'
 import Hero from './Hero.vue'
+import Exit from './Exit.vue'
 import Room from './Room.vue'
 
 export default {
   name: 'Dungeon',
   components: {
     Cell,
+    Rock,
     Room,
+    Exit,
     Hero
   },
   props:{
@@ -41,7 +46,8 @@ export default {
     };
   },
   created : function(){
-    this.update(); 
+    this.start();
+    this.$eventHub.$on('tick', this.entropy);
   },
   methods: {
      init : function(){
@@ -53,7 +59,7 @@ export default {
            }
         }
      },
-     update : function(){
+     start : function(){
        this.init();
        this.minRoomDimension = parseInt( this.minRoomDimension );
        this.currentRooms = { number : 0 };
@@ -62,15 +68,18 @@ export default {
        this.master.split( true, this.minRoomDimension, this.currentRooms, this.maxRooms );
        this.markRooms( this.master );
        this.markConnections( this.master ); 
-       this.addHero();
+       this.spawn('hero');
+       this.spawn('exit');
      },
      moveHero : function( moveData ){
        var requestedX = moveData.dir == 'up' ? moveData.x - 1 : moveData.dir == 'down' ? moveData.x + 1 : moveData.x;
        var requestedY = moveData.dir == 'left' ? moveData.y - 1 : moveData.dir == 'right' ? moveData.y + 1 : moveData.y;
        if ( this.rows[ requestedX ][ requestedY ].occupied == 'room' ){
          let hero = this.rows[ moveData.x ].splice( moveData.y, 1, { "occupied" : "room" } );
-         console.log( hero, "moving to:", requestedX, requestedY );
          this.rows[ requestedX ].splice( requestedY, 1, { "occupied" : "hero" } );
+       }else if ( this.rows[ requestedX ][ requestedY ].occupied == 'exit' ){
+         alert('You got out!');
+         this.start();
        }
      },
      markConnections : function( node ){
@@ -88,11 +97,14 @@ export default {
            this.markRooms( child );
         }
      },
-     addHero : function(){
+     spawn : function( type ){
         var options = this.findAllByType( "room" );
         var choice = options[ randInt( 0, options.length - 1 ) ];
-        this.rows[ choice.x].splice( choice.y, 1, { "occupied" : "hero" });
-       // this.rows[ choice.x ][ choice.y ] = { "occupied" : "monster" }
+        this.rows[ choice.x].splice( choice.y, 1, { "occupied" : type });
+     },
+     entropy : function(){
+       this.spawn('rock');
+       this.spawn('rock');
      },
      markRoom : function( x1, y1, x2, y2 ){
        for( var i = x1; i < x2; i++ ){

@@ -1,14 +1,18 @@
 <template>
   <div id="app" class="container">
     <div class="controls"> 
-        <div>Height: <input v-model="heightOfGrid" /></div>
-        <div>Width: <input v-model="widthOfGrid" /></div>
-        <div>Min Room Size: <input v-model="minRoomDimension" /></div>
-        <div>Max # Rooms: <input v-model="maxRooms" /></div>
-        <div>Hallway Width: <input v-model="hallwayWidth" /></div>
-
-        </div>
-
+      <div class="d-pad">
+        <div class="filler"></div>
+        <div><button v-on:click="handleKey({keyCode:38})">UP</button></div>
+        <div class="filler"></div>
+        <div><button v-on:click="handleKey({keyCode:37})">LEFT</button></div>
+        <div class="filler"></div>
+        <div><button v-on:click="handleKey({keyCode:39})">RIGHT</button></div>
+        <div class="filler"></div>
+        <div><button v-on:click="handleKey({keyCode:40})">DOWN</button></div>
+        <div class="filler"></div>
+      </div>
+</div>
     
         <Dungeon v-bind:widthOfGrid="widthOfGrid" v-bind:heightOfGrid="heightOfGrid" v-bind:minRoomDimension="minRoomDimension" v-bind:maxRooms="maxRooms" v-bind:hallwayWidth="hallwayWidth" ></Dungeon>
   
@@ -33,7 +37,8 @@ export default {
       widthOfGrid : 100,
       minRoomDimension : 15,
       maxRooms : 25,
-      hallwayWidth : 3
+      hallwayWidth : 3,
+      ticks : 0
     }
   },
   components: {
@@ -41,8 +46,10 @@ export default {
   },
   mounted : function(){
     window.addEventListener('keydown', (e) => {
-      console.log('h');
       this.handleKey(e);
+    });
+    this.$eventHub.$on('tick', () => {
+      this.ticks++;
     });
   },
   methods: {
@@ -51,15 +58,19 @@ export default {
       switch( e.keyCode ){
         case 38 :
           this.$eventHub.$emit('move', 'up' );
+          this.$eventHub.$emit('tick');
           break;
         case 40 :
           this.$eventHub.$emit('move', 'down' );
+          this.$eventHub.$emit('tick');
           break;
         case 37 :
           this.$eventHub.$emit('move', 'left' );
+          this.$eventHub.$emit('tick');
           break;
         case 39 :
           this.$eventHub.$emit('move', 'right' );
+          this.$eventHub.$emit('tick');
           break;
         default:
           break;
@@ -106,7 +117,21 @@ body{
    flex: 1 0 0px;
 }
 
+.d-pad {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 200px;
+}
 
+.d-pad > div {
+    flex: 1 0 calc( (100% - 3em) / 3 );
+}
+
+.d-pad button {
+    width: 100%;
+    height: 46px;
+    border-radius: 3px;
+}
 
 
 
